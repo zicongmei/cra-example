@@ -31,6 +31,8 @@ spec:
                     type: string
                   name:
                     type: string
+                  gcpProjectNumber:
+                    type: string
                 type: object
           status:
             type: object
@@ -50,6 +52,10 @@ spec:
                 items:
                   type: string
                 type: array
+              iamInstanceProfileControlplane:
+                type: string
+              iamInstanceProfileNodepool:
+                type: string
     additionalPrinterColumns:
     - name: VPC
       type: string

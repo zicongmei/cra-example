@@ -366,4 +366,492 @@ spec:
         string:
           type: Format
           fmt: "%s-database-kms-key"
+  - name: iamrole-api
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: Role
+      metadata:
+        labels:
+          role: api
+        name: api
+      spec:
+        forProvider:
+          path: /
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.gcpProjectNumber
+      toFieldPath: spec.forProvider.assumeRolePolicy
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "",
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Federated": "accounts.google.com"
+                  },
+                  "Action": "sts:AssumeRoleWithWebIdentity",
+                  "Condition": {
+                    "StringEquals": {
+                      "accounts.google.com:sub": "service-%s@gcp-sa-gkemulticloud.iam.gserviceaccount.com"
+                    }
+                  }
+                }
+              ]
+            }
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-api-role"
+  - name: iampolicy-api
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: Policy
+      metadata:
+        labels:
+          role: api
+        name: iampolicy-api
+      spec:
+        forProvider:
+          policy: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "",
+                  "Effect": "Allow",
+                  "Action": [
+                    "ec2:AuthorizeSecurityGroupEgress",
+                    "ec2:AuthorizeSecurityGroupIngress",
+                    "ec2:CreateLaunchTemplate",
+                    "ec2:CreateNetworkInterface",
+                    "ec2:CreateSecurityGroup",
+                    "ec2:CreateTags",
+                    "ec2:CreateVolume",
+                    "ec2:DeleteLaunchTemplate",
+                    "ec2:DeleteNetworkInterface",
+                    "ec2:DeleteSecurityGroup",
+                    "ec2:DeleteTags",
+                    "ec2:DeleteVolume",
+                    "ec2:DescribeAccountAttributes",
+                    "ec2:DescribeInstances",
+                    "ec2:DescribeInternetGateways",
+                    "ec2:DescribeKeyPairs",
+                    "ec2:DescribeLaunchTemplates",
+                    "ec2:DescribeNetworkInterfaces",
+                    "ec2:DescribeSecurityGroupRules",
+                    "ec2:DescribeSecurityGroups",
+                    "ec2:DescribeSubnets",
+                    "ec2:DescribeVpcs",
+                    "ec2:GetConsoleOutput",
+                    "ec2:ModifyInstanceAttribute",
+                    "ec2:ModifyNetworkInterfaceAttribute",
+                    "ec2:RevokeSecurityGroupEgress",
+                    "ec2:RevokeSecurityGroupIngress",
+                    "ec2:RunInstances",
+                    "iam:AWSServiceName",
+                    "iam:CreateServiceLinkedRole",
+                    "iam:GetInstanceProfile",
+                    "iam:PassRole",
+                    "autoscaling:CreateAutoScalingGroup",
+                    "autoscaling:CreateOrUpdateTags",
+                    "autoscaling:DeleteAutoScalingGroup",
+                    "autoscaling:DeleteTags",
+                    "autoscaling:DescribeAutoScalingGroups",
+                    "autoscaling:DisableMetricsCollection",
+                    "autoscaling:EnableMetricsCollection",
+                    "autoscaling:TerminateInstanceInAutoScalingGroup",
+                    "autoscaling:UpdateAutoScalingGroup",
+                    "elasticloadbalancing:AddTags",
+                    "elasticloadbalancing:CreateListener",
+                    "elasticloadbalancing:CreateLoadBalancer",
+                    "elasticloadbalancing:CreateTargetGroup",
+                    "elasticloadbalancing:DeleteListener",
+                    "elasticloadbalancing:DeleteLoadBalancer",
+                    "elasticloadbalancing:DeleteTargetGroup",
+                    "elasticloadbalancing:DescribeListeners",
+                    "elasticloadbalancing:DescribeLoadBalancers",
+                    "elasticloadbalancing:DescribeTargetGroups",
+                    "elasticloadbalancing:DescribeTargetHealth",
+                    "elasticloadbalancing:ModifyTargetGroupAttributes",
+                    "elasticloadbalancing:RemoveTags",
+                    "kms:DescribeKey",
+                    "kms:Encrypt",
+                    "kms:GenerateDataKeyWithoutPlaintext"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
 
+
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-api-policy"
+  - name: iamattachment-api
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: RolePolicyAttachment
+      metadata:
+        name: iamattachment-api
+      spec:
+        forProvider:
+          policyArnSelector:
+            matchControllerRef: true
+            matchLabels:
+              role: api
+          roleSelector:
+            matchControllerRef: true
+            matchLabels:
+              role: api
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-api-policy-attachment"
+  - name: iamrole-controlplane
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: Role
+      metadata:
+        labels:
+          role: controlplane
+        name: controlplane
+      spec:
+        forProvider:
+          assumeRolePolicy: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "",
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "ec2.amazonaws.com"
+                  },
+                  "Action": "sts:AssumeRole"
+                }
+              ]
+            }
+          path: /
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-api-controlplane"
+  - name: iampolicy-controlplane
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: Policy
+      metadata:
+        labels:
+          role: controlplane
+        name: iampolicy-controlplane
+      spec:
+        forProvider:
+          policy: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "",
+                  "Effect": "Allow",
+                  "Action": [
+                    "ec2:AttachNetworkInterface",
+                    "ec2:AttachVolume",
+                    "ec2:AuthorizeSecurityGroupIngress",
+                    "ec2:CreateRoute",
+                    "ec2:CreateSecurityGroup",
+                    "ec2:CreateSnapshot",
+                    "ec2:CreateTags",
+                    "ec2:CreateVolume",
+                    "ec2:DeleteRoute",
+                    "ec2:DeleteSecurityGroup",
+                    "ec2:DeleteSnapshot",
+                    "ec2:DeleteTags",
+                    "ec2:DeleteVolume",
+                    "ec2:DescribeAccountAttributes",
+                    "ec2:DescribeAvailabilityZones",
+                    "ec2:DescribeDhcpOptions",
+                    "ec2:DescribeInstances",
+                    "ec2:DescribeInstanceTypes",
+                    "ec2:DescribeInternetGateways",
+                    "ec2:DescribeLaunchTemplateVersions",
+                    "ec2:DescribeRegions",
+                    "ec2:DescribeRouteTables",
+                    "ec2:DescribeSecurityGroups",
+                    "ec2:DescribeSnapshots",
+                    "ec2:DescribeSubnets",
+                    "ec2:DescribeTags",
+                    "ec2:DescribeVolumes",
+                    "ec2:DescribeVolumesModifications",
+                    "ec2:DescribeVpcs",
+                    "ec2:DetachVolume",
+                    "ec2:ModifyInstanceAttribute",
+                    "ec2:ModifyVolume",
+                    "ec2:RevokeSecurityGroupIngress",
+                    "autoscaling:DescribeAutoScalingGroups",
+                    "autoscaling:DescribeAutoScalingInstances",
+                    "autoscaling:DescribeLaunchConfigurations",
+                    "autoscaling:DescribeTags",
+                    "autoscaling:SetDesiredCapacity",
+                    "autoscaling:TerminateInstanceInAutoScalingGroup",
+                    "elasticloadbalancing:AddTags",
+                    "elasticloadbalancing:ApplySecurityGroupsToLoadBalancer",
+                    "elasticloadbalancing:AttachLoadBalancerToSubnets",
+                    "elasticloadbalancing:ConfigureHealthCheck",
+                    "elasticloadbalancing:CreateListener",
+                    "elasticloadbalancing:CreateLoadBalancer",
+                    "elasticloadbalancing:CreateLoadBalancerListeners",
+                    "elasticloadbalancing:CreateLoadBalancerPolicy",
+                    "elasticloadbalancing:CreateTargetGroup",
+                    "elasticloadbalancing:DeleteListener",
+                    "elasticloadbalancing:DeleteLoadBalancer",
+                    "elasticloadbalancing:DeleteLoadBalancerListeners",
+                    "elasticloadbalancing:DeleteTargetGroup",
+                    "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+                    "elasticloadbalancing:DeregisterTargets",
+                    "elasticloadbalancing:DescribeListeners",
+                    "elasticloadbalancing:DescribeLoadBalancerAttributes",
+                    "elasticloadbalancing:DescribeLoadBalancerPolicies",
+                    "elasticloadbalancing:DescribeLoadBalancers",
+                    "elasticloadbalancing:DescribeTargetGroups",
+                    "elasticloadbalancing:DescribeTargetHealth",
+                    "elasticloadbalancing:DetachLoadBalancerFromSubnets",
+                    "elasticloadbalancing:ModifyListener",
+                    "elasticloadbalancing:ModifyLoadBalancerAttributes",
+                    "elasticloadbalancing:ModifyTargetGroup",
+                    "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+                    "elasticloadbalancing:RegisterTargets",
+                    "elasticloadbalancing:SetLoadBalancerPoliciesForBackendServer",
+                    "elasticloadbalancing:SetLoadBalancerPoliciesOfListener",
+                    "elasticfilesystem:CreateAccessPoint",
+                    "elasticfilesystem:DeleteAccessPoint",
+                    "elasticfilesystem:DescribeAccessPoints",
+                    "elasticfilesystem:DescribeFileSystems",
+                    "elasticfilesystem:DescribeMountTargets",
+                    "kms:CreateGrant",
+                    "kms:Decrypt",
+                    "kms:Encrypt",
+                    "kms:GrantIsForAWSResource"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-controlplane-policy"
+  - name: iamattachment-controlplane
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: RolePolicyAttachment
+      metadata:
+        name: iamattachment-controlplane
+      spec:
+        forProvider:
+          policyArnSelector:
+            matchControllerRef: true
+            matchLabels:
+              role: controlplane
+          roleSelector:
+            matchControllerRef: true
+            matchLabels:
+              role: controlplane
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-controlplane-policy-attachment"
+  - name: instance-profile-controlplane
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: InstanceProfile
+      metadata:
+        name: instance-profile-controlplane
+      spec:
+        forProvider:
+          roleSelector:
+            matchControllerRef: true
+            matchLabels:
+              role: controlplane
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.annotations[crossplane.io/external-name]
+      toFieldPath: status.iamInstanceProfileControlplane
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-controlplane-instance-profile"
+  - name: iamrole-nodepool
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: Role
+      metadata:
+        labels:
+          role: nodepool
+        name: nodepool
+      spec:
+        forProvider:
+          assumeRolePolicy: |
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Sid": "",
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "ec2.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+            }
+          path: /
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-api-nodepool"
+  - name: iampolicy-nodepool
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: Policy
+      metadata:
+        labels:
+          role: nodepool
+        name: iampolicy-nodepool
+      spec:
+        forProvider:
+          policy: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": ["kms:Decrypt"],
+                  "Resource": *
+                }
+              ]
+            }
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-nodepool-policy"
+  - name: iamattachment-nodepool
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: RolePolicyAttachment
+      metadata:
+        name: iamattachment-nodepool
+      spec:
+        forProvider:
+          policyArnSelector:
+            matchControllerRef: true
+            matchLabels:
+              role: nodepool
+          roleSelector:
+            matchControllerRef: true
+            matchLabels:
+              role: nodepool
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-nodepool-policy-attachment"
+  - name: instance-profile-nodepool
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: InstanceProfile
+      metadata:
+        name: instance-profile-nodepool
+      spec:
+        forProvider:
+          roleSelector:
+            matchControllerRef: true
+            matchLabels:
+              role: nodepool
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.annotations[crossplane.io/external-name]
+      toFieldPath: status.iamInstanceProfileNodepool
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-nodepool-instance-profile"
