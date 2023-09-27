@@ -1,0 +1,56 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: compositeprerequisites.demo.anthos.com
+spec:
+  group: demo.anthos.com
+  names:
+    kind: CompositePrerequisites
+    plural: compositeprerequisites
+  claimNames: # this is what namespace scoped XRCs are called
+    kind: Prerequisites
+    plural: prerequisites
+  versions:
+  - name: v1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              parameters:
+                description: GKE on AWS cluster prerequisites.
+                properties:
+                  managementPolicy:
+                    type: string
+                    default: FullControl #ObserveOnly
+                  awsRegion:
+                    type: string
+                  name:
+                    type: string
+                type: object
+          status:
+            type: object
+            description: state of a Cluster.
+            properties:
+              vpcId:
+                type: string
+              configKmsKeyArn:
+                type: string
+              databaseKmsKeyArn:
+                type: string
+              publicSubnets:
+                items:
+                  type: string
+                type: array
+              privateSubnets:
+                items:
+                  type: string
+                type: array
+    additionalPrinterColumns:
+    - name: VPC
+      type: string
+      jsonPath: ".status.vpcId"

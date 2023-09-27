@@ -1,0 +1,12 @@
+apiVersion: demo.anthos.com/v1
+kind: CompositePrerequisites
+metadata:
+  name: vpc-1
+spec:
+#  compositeDeletePolicy: Foreground
+  compositionRef:
+    name: prerequisites-gke-on-aws
+  parameters:
+    # managementPolicy: ObserveOnly #toggle to remove management
+    awsRegion: "us-east-1"
+    name: "gke-on-aws-vpc-1"

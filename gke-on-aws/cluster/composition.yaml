@@ -1,0 +1,101 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: cluster-gke-on-aws
+  labels:
+    crossplane.io/xrd: compositeclusters.demo.anthos.com
+    provider: aws
+    cluster: gke
+spec:
+  compositeTypeRef:
+    apiVersion: demo.anthos.com/v1
+    kind:  CompositeCluster
+  patchSets:
+  - name: gcp-patches
+    patches:
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.gcpRegion
+      toFieldPath: spec.forProvider.location
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.gcpProjectId
+      toFieldPath: spec.forProvider.project
+    - type: FromCompositeFieldPath
+      fromFieldPath: metadata.labels
+      toFieldPath: metadata.labels
+  resources:
+  - name: cluster
+    base:
+      apiVersion: containeraws.gcp.gke.cloud.google.com/v1beta1
+      kind: Cluster
+      metadata:
+        name: cluster
+      spec:
+        forProvider:
+          networking:
+            - podAddressCidrBlocks:
+              - "10.2.0.0/16"
+              serviceAddressCidrBlocks:
+              - "10.1.0.0/16"
+    patches:
+    - type: PatchSet
+      patchSetName: gcp-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.awsRegion
+      toFieldPath: spec.forProvider.awsRegion
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.adminUsers[0]
+      toFieldPath: spec.forProvider.authorization[0].adminUsers[0].username
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.roleArn
+      toFieldPath: spec.forProvider.controlPlane[0].awsServicesAuthentication[0].roleArn
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.iamInstanceProfileControlplane
+      toFieldPath: spec.forProvider.controlPlane[0].iamInstanceProfile
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.configKmsKeyArn
+      toFieldPath: spec.forProvider.controlPlane[0].configEncryption[0].kmsKeyArn
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.databaseKmsKeyArn
+      toFieldPath: spec.forProvider.controlPlane[0].databaseEncryption[0].kmsKeyArn
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.publicSubnets
+      toFieldPath: spec.forProvider.controlPlane[0].subnetIds
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.k8sVersion
+      toFieldPath: spec.forProvider.controlPlane[0].version
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.fleetProject
+      toFieldPath: spec.forProvider.fleet[0].project
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.vpcId
+      toFieldPath: spec.forProvider.networking[0].vpcId
+  - name: nodepool
+    base:
+      apiVersion: containeraws.gcp.gke.cloud.google.com/v1beta1
+      kind: NodePool
+      metadata:
+        name: nodepool
+      spec:
+        forProvider:
+          autoscaling:
+          - maxNodeCount: 5
+            minNodeCount: 1
+          clusterSelector:
+            matchControllerRef: true
+          maxPodsConstraint:
+          - maxPodsPerNode: 110
+    patches:
+    - type: PatchSet
+      patchSetName: gcp-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.configKmsKeyArn
+      toFieldPath: spec.forProvider.config[0].configEncryption[0].kmsKeyArn
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.iamInstanceProfileNodepool
+      toFieldPath: spec.forProvider.config[0].iamInstanceProfile
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.k8sVersion
+      toFieldPath: spec.forProvider.subnetId
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.k8sVersion
+      toFieldPath: spec.forProvider.version

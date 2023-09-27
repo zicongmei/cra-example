@@ -1,0 +1,74 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: compositeclusters.demo.anthos.com
+spec:
+  connectionSecretKeys:
+  - kubeconfig
+  group: demo.anthos.com
+  names:
+    kind: CompositeCluster
+    plural: compositeclusters
+  claimNames: # this is what namespace scoped XRCs are called
+    kind: Cluster
+    plural: clusters
+  versions:
+  - name: v1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              parameters:
+                description: GKE on AWS cluster configs.
+                properties:
+                  managementPolicy:
+                    type: string
+                    default: FullControl #ObserveOnly
+                  adminUsers:
+                    items:
+                      type: string
+                    type: array
+                  awsRegion:
+                    type: string
+                  gcpRegion:
+                    type: string
+                  name:
+                    type: string
+                  roleArn:
+                    type: string
+                  iamInstanceProfileControlplane:
+                    type: string
+                  iamInstanceProfileNodepool:
+                    type: string
+                  configKmsKeyArn:
+                    type: string
+                  databaseKmsKeyArn:
+                    type: string
+                  k8sVersion:
+                    type: string # eg 1.26.7-gke.500
+                  fleetProject:
+                    type: string # eg "projects/933682497375"
+                  gcpProjectId:
+                    type: string
+                  publicSubnets:
+                    items:
+                      type: string
+                    type: array
+                  vpcId:
+                    type: string
+                type: object
+          status:
+            type: object
+            description: state of a Cluster.
+            properties:
+              clusterName:
+                type: string
+    additionalPrinterColumns:
+    - name: clusterName
+      type: string
+      jsonPath: ".status.clusterName"

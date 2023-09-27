@@ -1,0 +1,369 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: prerequisites-gke-on-aws
+  labels:
+    crossplane.io/xrd: compositeprerequisites.demo.anthos.com
+    provider: aws
+    cluster: gke
+spec:
+  compositeTypeRef:
+    apiVersion: demo.anthos.com/v1
+    kind:  CompositePrerequisites
+  patchSets:
+  - name: aws-patches
+    patches:
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.awsRegion
+      toFieldPath: spec.forProvider.region
+    - type: FromCompositeFieldPath
+      fromFieldPath: metadata.labels
+      toFieldPath: metadata.labels
+  resources:
+  - name: vpc
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: VPC
+      metadata:
+        name: vpc-gke-on-aws
+      spec:
+        forProvider:
+          cidrBlock: 10.0.0.0/16
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.annotations[crossplane.io/external-name]
+      toFieldPath: status.vpcId
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-vpc"
+  - name: subnet-public-a
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: Subnet
+      metadata:
+        name: subnet-public-a
+        labels:
+          access: public
+      spec:
+        forProvider:
+          cidrBlock: 10.0.101.0/24
+          vpcIdSelector:
+            matchControllerRef: true
+          mapPublicIpOnLaunch: true
+          tags:
+            "kubernetes.io/role/elb": "1"
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+      toFieldPath: status.publicSubnets[0]
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.awsRegion
+      toFieldPath: spec.forProvider.availabilityZone
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%sa"
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-public-a"
+  - name: subnet-public-b
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: Subnet
+      metadata:
+        name: subnet-public-b
+        labels:
+          access: public
+      spec:
+        forProvider:
+          cidrBlock: 10.0.102.0/24
+          vpcIdSelector:
+            matchControllerRef: true
+          mapPublicIpOnLaunch: true
+          tags:
+            "kubernetes.io/role/elb": "1"
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+      toFieldPath: status.publicSubnets[1]
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.awsRegion
+      toFieldPath: spec.forProvider.availabilityZone
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%sb"
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-public-b"
+  - name: subnet-public-c
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: Subnet
+      metadata:
+        name: subnet-public-c
+        labels:
+          access: public
+      spec:
+        forProvider:
+          cidrBlock: 10.0.103.0/24
+          vpcIdSelector:
+            matchControllerRef: true
+          mapPublicIpOnLaunch: true
+          tags:
+            "kubernetes.io/role/elb": "1"
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+      toFieldPath: status.publicSubnets[2]
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.awsRegion
+      toFieldPath: spec.forProvider.availabilityZone
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%sc"
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-public-c"
+  - name: subnet-private-a
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: Subnet
+      metadata:
+        name: subnet-private-a
+        labels:
+          access: private
+      spec:
+        forProvider:
+          cidrBlock: 10.0.1.0/24
+          vpcIdSelector:
+            matchControllerRef: true
+          tags:
+            "kubernetes.io/role/internal-elb": "1"
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+      toFieldPath: status.privateSubnets[0]
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.awsRegion
+      toFieldPath: spec.forProvider.availabilityZone
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%sa"
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-private-a"
+  - name: subnet-private-b
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: Subnet
+      metadata:
+        name: subnet-private-b
+        labels:
+          access: private
+      spec:
+        forProvider:
+          cidrBlock: 10.0.2.0/24
+          vpcIdSelector:
+            matchControllerRef: true
+          tags:
+            "kubernetes.io/role/internal-elb": "1"
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+      toFieldPath: status.privateSubnets[1]
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.awsRegion
+      toFieldPath: spec.forProvider.availabilityZone
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%sb"
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-private-b"
+  - name: subnet-private-c
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: Subnet
+      metadata:
+        name: subnet-private-c
+        labels:
+          access: private
+      spec:
+        forProvider:
+          cidrBlock: 10.0.3.0/24
+          vpcIdSelector:
+            matchControllerRef: true
+          tags:
+            "kubernetes.io/role/internal-elb": "1"
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+      toFieldPath: status.privateSubnets[2]
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.awsRegion
+      toFieldPath: spec.forProvider.availabilityZone
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%sc"
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-private-c"
+  - name: inet-gateway
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: InternetGateway
+      metadata:
+        name: inet-gateway
+        labels:
+          name: inet-gateway
+      spec:
+        forProvider:
+          vpcIdSelector:
+            matchControllerRef: true
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-igw"
+  - name: route-to-ig
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: DefaultRouteTable
+      metadata:
+        name: routetoIG
+        labels:
+          name: defaultRouteTable
+      spec:
+        forProvider:
+          defaultRouteTableIdSelector:
+            matchControllerRef: true
+          route:
+          - cidrBlock: 0.0.0.0/0
+            gatewayIdSelector:
+              matchControllerRef: true
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-igw-route"
+  - name: config-kms-key
+    base:
+      apiVersion: kms.aws.gke.cloud.google.com/v1beta1
+      kind: Key
+      metadata:
+        name: config-kms-key
+      spec:
+        forProvider:
+          deletionWindowInDays: 14
+          description: "gke-on-aws config encryption key"
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.arn
+      toFieldPath: status.configKmsKeyArn
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-config-kms-key"
+  - name: database-kms-key
+    base:
+      apiVersion: kms.aws.gke.cloud.google.com/v1beta1
+      kind: Key
+      metadata:
+        name: database-kms-key
+      spec:
+        forProvider:
+          deletionWindowInDays: 14
+          description: "gke-on-aws database encryption key"
+    patches:
+    - type: PatchSet
+      patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.arn
+      toFieldPath: status.databaseKmsKeyArn
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.forProvider.tags["Name"]
+      transforms:
+      - type: string
+        string:
+          type: Format
+          fmt: "%s-database-kms-key"
+

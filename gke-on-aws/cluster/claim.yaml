@@ -1,0 +1,29 @@
+#Demo of importing a GKE cluster into a given composition
+apiVersion: demo.anthos.com/v1
+kind: CompositeCluster
+metadata:
+  name: cluster-2 # name to call the cluster in Cloud Resource Accelerator
+spec:
+#  compositeDeletePolicy: Foreground
+  compositionRef:
+    name: cluster-gke-on-aws
+  parameters:
+    # managementPolicy: ObserveOnly #toggle to remove management
+    awsRegion: "us-east-1"
+    gcpRegion: "us-east4"
+    name: "gke-on-aws-cluster-1"
+    roleArn: "arn:aws:iam::507099386010:role/zicong-1p-dev-1p_0"
+    iamInstanceProfileControlplane: "zicong-1p-dev-cp-0"
+    iamInstanceProfileNodepool: "zicong-1p-dev-np-0"
+    k8sVersion: "1.26.7-gke.500"
+    fleetProject: "projects/933682497375"
+    gcpProjectId: "zicong-gke-multi-cloud-dev-2"
+    configKmsKeyArn: "arn:aws:kms:us-east-1:507099386010:key/4e37aec4-0cb9-4ae8-a168-d7c4c74616ca"
+    databaseKmsKeyArn: "arn:aws:kms:us-east-1:507099386010:key/2c70a213-4d63-48bc-9db4-02f570ac8b04"
+    publicSubnets:
+    - "subnet-07c8dcb498e4492a3"
+    - "subnet-0c17c18800c0175b4"
+    - "subnet-0f577798e22bcb131"
+    vpcId: "vpc-0ed0ab77ce0e03316"
+    adminUsers:
+    - "zicong@google.com"
