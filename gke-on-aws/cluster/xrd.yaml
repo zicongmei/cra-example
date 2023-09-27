@@ -59,6 +59,10 @@ spec:
                     items:
                       type: string
                     type: array
+                  privateSubnets:
+                    items:
+                      type: string
+                    type: array
                   vpcId:
                     type: string
                 type: object

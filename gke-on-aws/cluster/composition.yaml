@@ -94,7 +94,7 @@ spec:
       fromFieldPath: spec.parameters.iamInstanceProfileNodepool
       toFieldPath: spec.forProvider.config[0].iamInstanceProfile
     - type: FromCompositeFieldPath
-      fromFieldPath: spec.parameters.k8sVersion
+      fromFieldPath: spec.parameters.privateSubnets[0]
       toFieldPath: spec.forProvider.subnetId
     - type: FromCompositeFieldPath
       fromFieldPath: spec.parameters.k8sVersion

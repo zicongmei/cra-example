@@ -26,4 +26,8 @@ spec:
     - subnet-0f8b71773b25e022d
     - subnet-0d3b19c26f09afd54
     - subnet-0f8b40a8296baaa01
+    privateSubnets:
+    - subnet-02625633bc431ba6b
+    - subnet-00e30191a3f15be4f
+    - subnet-0ca69431ad9b88133
     vpcId: vpc-027d750edca3a8683
