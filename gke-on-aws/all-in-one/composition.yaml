@@ -16,6 +16,9 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: spec.parameters.awsRegion
       toFieldPath: spec.forProvider.region
+    - type: FromCompositeFieldPath
+      fromFieldPath: metadata.labels
+      toFieldPath: metadata.labels
   resources:
   - name: vpc
     base:
@@ -373,7 +376,6 @@ spec:
         name: api
       spec:
         forProvider:
-          assumeRolePolicy: ""
           path: /
     patches:
     - type: PatchSet

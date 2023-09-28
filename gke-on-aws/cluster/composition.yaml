@@ -19,9 +19,6 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: spec.parameters.gcpProjectId
       toFieldPath: spec.forProvider.project
-    - type: FromCompositeFieldPath
-      fromFieldPath: metadata.labels
-      toFieldPath: metadata.labels
   resources:
   - name: cluster
     base:
