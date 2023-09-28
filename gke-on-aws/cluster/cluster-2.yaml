@@ -20,6 +20,8 @@ spec:
     k8sVersion: "1.26.7-gke.500"
     fleetProject: "projects/933682497375"
     gcpProjectId: "zicong-gke-multi-cloud-dev-2"
+
+    # Following info from the vpc1 status
     configKmsKeyArn: arn:aws:kms:us-west-2:507099386010:key/e4dc010a-d94b-493d-9050-cad40bce771e
     databaseKmsKeyArn: arn:aws:kms:us-west-2:507099386010:key/1bc62b93-de29-4ed5-9060-6ccbb40d361f
     publicSubnets:
