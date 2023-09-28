@@ -2,7 +2,7 @@
 apiVersion: demo.anthos.com/v1
 kind: CompositeCluster
 metadata:
-  name: cluster-3 # name to call the cluster in Cloud Resource Accelerator
+  name: cluster-1 # name to call the cluster in Cloud Resource Accelerator
 spec:
 #  compositeDeletePolicy: Foreground
   compositionRef:

@@ -1,5 +1,6 @@
 
-Prerequisites:
+deployment: 
 
-1. [TODO add this to composition]User need to follow the [Create AWS IAM roles](https://cloud.google.com/anthos/clusters/docs/multi-cloud/aws/how-to/create-aws-iam-roles)
-to create the IAM roles and instance profiles. 
+1. `kubectl apply -f xrd.yaml`
+2. `kubectl apply -f composition.yaml`
+3. `kubectl apply -f claim.yaml`

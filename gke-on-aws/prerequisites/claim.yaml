@@ -1,7 +1,7 @@
 apiVersion: demo.anthos.com/v1
 kind: CompositePrerequisites
 metadata:
-  name: vpc-2
+  name: vpc-1
 spec:
 #  compositeDeletePolicy: Foreground
   compositionRef:

@@ -787,7 +787,7 @@ spec:
                 {
                   "Effect": "Allow",
                   "Action": ["kms:Decrypt"],
-                  "Resource": *
+                  "Resource": "*"
                 }
               ]
             }
