@@ -10,3 +10,4 @@ spec:
     # managementPolicy: ObserveOnly #toggle to remove management
     awsRegion: "us-west-2"
     name: "gke-on-aws-vpc-1"
+    gcpProjectNumber: "933682497375"
