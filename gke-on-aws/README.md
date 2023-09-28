@@ -11,7 +11,7 @@ Use can deploy:
 pushd prerequisites
 kubectl apply -f xrd.yaml
 kubectl apply -f composition.yaml
-kubectl apply -f claim.yaml
+kubectl apply -f vpc-1.yaml
 popd
 ```
 
