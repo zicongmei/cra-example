@@ -39,7 +39,7 @@ spec:
                     type: string
                   name:
                     type: string
-                  roleArn:
+                  apiRoleArn:
                     type: string
                   iamInstanceProfileControlplane:
                     type: string

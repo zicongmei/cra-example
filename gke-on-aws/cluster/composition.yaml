@@ -43,7 +43,7 @@ spec:
       fromFieldPath: spec.parameters.adminUsers[0]
       toFieldPath: spec.forProvider.authorization[0].adminUsers[0].username
     - type: FromCompositeFieldPath
-      fromFieldPath: spec.parameters.roleArn
+      fromFieldPath: spec.parameters.apiRoleArn
       toFieldPath: spec.forProvider.controlPlane[0].awsServicesAuthentication[0].roleArn
     - type: FromCompositeFieldPath
       fromFieldPath: spec.parameters.iamInstanceProfileControlplane

@@ -378,6 +378,9 @@ spec:
     patches:
     - type: PatchSet
       patchSetName: aws-patches
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.arn
+      toFieldPath: status.apiRoleArn
     - type: FromCompositeFieldPath
       fromFieldPath: spec.parameters.gcpProjectNumber
       toFieldPath: spec.forProvider.assumeRolePolicy
