@@ -1,0 +1,11 @@
+
+apiVersion: load-test.anthos.com/v1
+kind: Xrd${xrd_i}
+metadata:
+  name: claim-${xrd_i}-${composite_i}-${claim_i}
+spec:
+  compositionRef:
+    name: composition-${xrd_i}-${composite_i}
+  parameters:
+    path: claim-${xrd_i}-${composite_i}-${claim_i}.txt
+---

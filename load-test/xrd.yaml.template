@@ -1,0 +1,31 @@
+
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: compositexrd${xrd_i}.load-test.anthos.com
+spec:
+  group: load-test.anthos.com
+  names:
+    kind: CompositeXrd${xrd_i}
+    plural: compositexrd${xrd_i}
+  claimNames: # this is what namespace scoped XRCs are called
+    kind: Xrd${xrd_i}
+    plural: xrd${xrd_i}
+  versions:
+  - name: v1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              parameters:
+                description: path of the file.
+                properties:
+                  path:
+                    type: string
+                type: object
+---

@@ -1,0 +1,1 @@
+echo "xrd ${xrd_i}, composite ${composite_i}, claim ${claim_i}"

@@ -1,0 +1,28 @@
+
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: composition-${xrd_i}-${composite_i}
+  labels:
+    crossplane.io/xrd: compositexrd${xrd_i}.load-test.anthos.com
+spec:
+  compositeTypeRef:
+    apiVersion: load-test.anthos.com/v1
+    kind: CompositeXrd${xrd_i}
+  resources:
+  - name: object
+    base:
+      apiVersion: storage.gcp.upbound.io/v1beta1
+      kind: BucketObject
+      metadata:
+        name: bucket-object-${xrd_i}-${composite_i}
+      spec:
+        forProvider:
+          bucket: "bucket-zicong-1681862021"
+          content: test-${xrd_i}-${composite_i}!
+          contentType: text/plain
+    patches:
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.path
+      toFieldPath: spec.forProvider.name
+---
