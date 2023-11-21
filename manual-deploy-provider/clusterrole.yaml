@@ -1,0 +1,112 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: crossplane:provider:provider-anthos-aws-manual:system
+rules:
+- apiGroups:
+  - eks.aws.gke.cloud.google.com
+  resources:
+  - clusterauths
+  - clusterauths/status
+  - clusters
+  - clusters/status
+  - nodegroups
+  - nodegroups/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - create
+- apiGroups:
+  - ec2.aws.gke.cloud.google.com
+  resources:
+  - defaultroutetables
+  - defaultroutetables/status
+  - eips
+  - eips/status
+  - instances
+  - instances/status
+  - internetgateways
+  - internetgateways/status
+  - keypairs
+  - keypairs/status
+  - natgateways
+  - natgateways/status
+  - networkinterfaces
+  - networkinterfaces/status
+  - routetableassociations
+  - routetableassociations/status
+  - routetables
+  - routetables/status
+  - securitygroups
+  - securitygroups/status
+  - subnets
+  - subnets/status
+  - vpcs
+  - vpcs/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - create
+- apiGroups:
+  - iam.aws.gke.cloud.google.com
+  resources:
+  - instanceprofiles
+  - instanceprofiles/status
+  - policies
+  - policies/status
+  - rolepolicyattachments
+  - rolepolicyattachments/status
+  - roles
+  - roles/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - create
+- apiGroups:
+  - kms.aws.gke.cloud.google.com
+  resources:
+  - keys
+  - keys/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - create
+- apiGroups:
+  - aws.gke.cloud.google.com
+  resources:
+  - providerconfigs
+  - providerconfigs/status
+  - providerconfigusages
+  - providerconfigusages/status
+  - storeconfigs
+  - storeconfigs/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - create
+- apiGroups:
+  - ""
+  - coordination.k8s.io
+  resources:
+  - secrets
+  - configmaps
+  - events
+  - leases
+  verbs:
+  - '*'

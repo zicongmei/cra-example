@@ -1,0 +1,102 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: crossplane-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloud-resource-accelerator-provider-aws
+  namespace: crossplane-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: provider-anthos-aws
+  namespace: crossplane-system
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      pkg.crossplane.io/provider: provider-aws
+      pkg.crossplane.io/revision: provider-anthos-aws-manual
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        pkg.crossplane.io/provider: provider-aws
+        pkg.crossplane.io/revision: provider-anthos-aws-manual
+      name: provider-aws
+      namespace: crossplane-system
+    spec:
+      containers:
+      - args:
+        - --debug
+        - --enable-management-policies
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: AWS_WEB_IDENTITY_TOKEN_FILE
+          value: /var/run/secrets/workload-identity-token/serviceaccount/token
+        - name: AWS_ROLE_ARN
+          value: PLACEHOLDER
+        image: gcr.io/krmapihosting-release/provider-aws-amd64:v0.34.0-gke.1@sha256:f1ab6d8daa930b208064b26e5367b40659e60126931e79f4e1abe17f8979dd4c
+        imagePullPolicy: IfNotPresent
+        name: provider-aws
+        ports:
+        - containerPort: 8080
+          name: metrics
+          protocol: TCP
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          runAsGroup: 2000
+          runAsNonRoot: true
+          runAsUser: 2000
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/run/secrets/workload-identity-token/serviceaccount
+          name: workload-identity-token
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 2000
+      serviceAccount: cloud-resource-accelerator-provider-aws
+      serviceAccountName: cloud-resource-accelerator-provider-aws
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: workload-identity-token
+        projected:
+          defaultMode: 420
+          sources:
+          - serviceAccountToken:
+              audience: sts.amazonaws.com
+              expirationSeconds: 3600
+              path: token
+          - configMap:
+              items:
+              - key: ca.crt
+                path: ca.crt
+              name: kube-root-ca.crt
+          - downwardAPI:
+              items:
+              - fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+                path: namespace
