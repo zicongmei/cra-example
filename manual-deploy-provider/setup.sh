@@ -1,9 +1,19 @@
 # Setup an AWS provider to a cluster without crossplane
 
 kubectl apply -f crds
-kubectl apply -f clusterrolebinding.yaml
+
+if [[ $GENERATE_RBAC == "true" ]]
+then
+  pushd generate-rbac
+  go run main.go
+  popd
+else
+  kubectl apply -f clusterrole.yaml
+  kubectl apply -f clusterrolebinding.yaml
+fi
+
+
 kubectl apply -f deployment.yaml
-kubectl apply -f clusterrole.yaml
 
 NAMESPACE=crossplane-config
 
